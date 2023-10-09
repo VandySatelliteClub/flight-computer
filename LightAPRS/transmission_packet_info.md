@@ -1,7 +1,7 @@
 ## Example transmission from LightAPRS (what shows up on the APRS.fi website)
 
 **2023-04-22 14:20:39** = timestamp never part of telemetry_buff - starts at element 26 of packet ptr in APRS_sendLocWtTmStmp\
-**1 MPH 0° alt 709 ft**  = part of telemetry_buff comes after timestamp and long at lat within raw string - parsed to this format by APRS.fi\
+**1 MPH 0° alt 709 ft**  = part of telemetry_buff comes after timestamp, long, and lat within raw string - parsed to this format by APRS.fi\
 **005TxC 23.30C 995.22hPa 6.34V 05S "http://www.lightaprs.com"** = comment variable within main ino file - becomes part of telemetry_buff\ 
 **LightAPRS-W by TA2NHP & TA2MUN** = StatusMessage variable within main ino file
 
@@ -15,5 +15,5 @@
 
 
 ## Additional information on the parser for APRS
-https://aprs.fi/doc/guide/aprsfi-raw-packets.html
-https://metacpan.org/pod/Ham::APRS::FAP
+- https://aprs.fi/doc/guide/aprsfi-raw-packets.html\
+- https://metacpan.org/pod/Ham::APRS::FAP
