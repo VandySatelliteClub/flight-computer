@@ -34,8 +34,8 @@ AX25Call path[4];
 
 
 // Location packet assembly fields
-char latitude[9];
-char longtitude[10];
+char latitude[9]; //max size 9 char for lat
+char longtitude[10]; //max size 10 char for long
 char symbolTable = '/';
 char symbol = 'n';
 
@@ -202,7 +202,7 @@ void APRS_printSettings() {
     Serial.print(F("Longtitude:   ")); if (longtitude[0] != 0) { Serial.println(longtitude); } else { Serial.println(F("N/A")); }
 }
 
-void APRS_sendPkt(void *_buffer, size_t length) {
+void APRS_sendPkt(void *_buffer, size_t length) { //Actual method for packet transmission
 
     uint8_t *buffer = (uint8_t *)_buffer;
 
@@ -239,7 +239,7 @@ void APRS_sendPkt(void *_buffer, size_t length) {
         path_len -=2;
     }
     
-	ax25_sendVia(&AX25, path, path_len, buffer, length);
+	ax25_sendVia(&AX25, path, path_len, buffer, length); //in different file.
     //ax25_sendVia(&AX25, path, countof(path), buffer, length);
 }
 
@@ -276,12 +276,12 @@ void APRS_sendLoc(void *_buffer, size_t length) {
         memcpy(ptr, buffer, length);
     }
 
-    APRS_sendPkt(packet, payloadLength);
+    APRS_sendPkt(packet, payloadLength); //sendPkt call
     free(packet);
 }
 
 //added for LibAPRS
-void APRS_sendLocWtTmStmp(void *_buffer, size_t length, char *timestamp_buff) {
+void APRS_sendLocWtTmStmp(void *_buffer, size_t length, char *timestamp_buff) { //most common form of transmission (default setting of the LightAPRS board)
 
     size_t payloadLength = 27+length;
     bool usePHG = false;
@@ -290,18 +290,18 @@ void APRS_sendLocWtTmStmp(void *_buffer, size_t length, char *timestamp_buff) {
         payloadLength += 7;
     }
     uint8_t *packet = (uint8_t*)malloc(payloadLength);
-    uint8_t *ptr = packet;
+    uint8_t *ptr = packet; //uint8_t ptr to point to packet
     packet[0] = '/';
     packet[16] = symbolTable;
     packet[26] = symbol;
     ptr++;
-    memcpy(ptr, timestamp_buff, 7);
+    memcpy(ptr, timestamp_buff, 7); //copy 7 char from timestamp buff to ptr
 	ptr += 7;
-    memcpy(ptr, latitude, 8);
+    memcpy(ptr, latitude, 8); //copy 8 char from latitude to ptr
     ptr += 9;
-    memcpy(ptr, longtitude, 9);
+    memcpy(ptr, longtitude, 9); //copy 9 char from longitude to ptr
     ptr += 10;
-    if (usePHG) {
+    if (usePHG) { //Power high gain parameters
         packet[27] = 'P';
         packet[28] = 'H';
         packet[29] = 'G';
@@ -311,7 +311,7 @@ void APRS_sendLocWtTmStmp(void *_buffer, size_t length, char *timestamp_buff) {
         packet[33] = directivity+48;
         ptr+=7;
     }
-    if (length > 0) {
+    if (length > 0) { //remaining data - copy values to ptr (packet)
         uint8_t *buffer = (uint8_t *)_buffer;
         memcpy(ptr, buffer, length);
     }

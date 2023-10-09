@@ -55,8 +55,8 @@ int8_t CallNumber = 11;             //SSID http://www.aprs.org/aprs11/SSIDs.txt
 char Symbol = 'O';                  // '/O' for balloon, '/>' for car, for more info : http://www.aprs.org/symbols/symbols-new.txt
 bool alternateSymbolTable = false;  //false = '/' , true = '\'
 
-char comment[50] = "http://www.lightaprs.com";  // Max 50 char
-char StatusMessage[50] = "LightAPRS-W by TA2NHP & TA2MUN";
+char comment[50] = "http://www.lightaprs.com";  // Max 50 - change comment to contain addit. values since transmitting URL is useless.
+char StatusMessage[50] = "LightAPRS-W by TA2NHP & TA2MUN"; //change this message too - can contain more data 
 //*****************************************************************************
 
 uint16_t BeaconWait = 50;  //seconds sleep for next beacon (HF or VHF). This is optimized value, do not change this if possible.
@@ -125,7 +125,7 @@ boolean send_aprs_enhanced_precision = true;
 boolean radioSetup = false;
 boolean aliveStatus = true;  //for tx status message on first wake-up just once.
 
-static char telemetry_buff[100];  // telemetry buffer
+static char telemetry_buff[100];  // telemetry buffer (100 Characters to work with)
 uint16_t TxCount = 1;             //increase +1 after every APRS transmission
 
 //*******************************************************************************
@@ -336,7 +336,7 @@ void loop() {
       }
     }
   } else {
-    sleepSeconds(BattWait);
+    sleepSeconds(BattWait); //some form of sleeping occuring at end of loop
   }
 }
 
@@ -467,7 +467,7 @@ void updatePosition(int high_precision, char *dao) {
   sprintf(latStr, "%02u%02u.%02u%c", (unsigned int)(rawDeg.deg % 100), (unsigned int)((min_nnnnn / 100000) % 100), (unsigned int)((min_nnnnn / 1000) % 100), rawDeg.negative ? 'S' : 'N');
   if (dao)
     dao[0] = (char)((min_nnnnn % 1000) / 11) + 33;
-  APRS_setLat(latStr);
+  APRS_setLat(latStr); //after latStr updated - sent to latitude variable in LibAPRS.cpp
 
 
   // Convert and set longitude NMEA string Degree Minute Hundreths of minutes ddmm.hh[E,W].
@@ -483,16 +483,16 @@ void updatePosition(int high_precision, char *dao) {
     dao[2] = 0;
   }
 
-  APRS_setLon(lonStr);
+  APRS_setLon(lonStr); //after longStr updated - sent to longitude variable in LibAPRS.cpp
 }
 
 
-void updateTelemetry() {
-  sprintf(telemetry_buff, "%03d", gps.course.isValid() ? (int)gps.course.deg() : 0);
+void updateTelemetry() { //updating telemetry_buff (the raw packet data on APRS)
+  sprintf(telemetry_buff, "%03d", gps.course.isValid() ? (int)gps.course.deg() : 0); //first 3 elements of buff are heading
   telemetry_buff[3] = '/';
-  sprintf(telemetry_buff + 4, "%03d", gps.speed.isValid() ? (int)gps.speed.knots() : 0);
+  sprintf(telemetry_buff + 4, "%03d", gps.speed.isValid() ? (int)gps.speed.knots() : 0); //next 3 elements are speed in knots
   telemetry_buff[7] = '/';
-  telemetry_buff[8] = 'A';
+  telemetry_buff[8] = 'A'; //altitude = {elements 10 thru 15} 
   telemetry_buff[9] = '=';
   //sprintf(telemetry_buff + 10, "%06lu", (long)gps.altitude.feet());
 
@@ -530,7 +530,7 @@ void updateTelemetry() {
   telemetry_buff[52] = 'S';
   telemetry_buff[53] = ' ';
 
-  sprintf(telemetry_buff + 54, "%s", comment);
+  sprintf(telemetry_buff + 54, "%s", comment); //useless comment appended to telemetry buff as well
 
   // APRS PRECISION AND DATUM OPTION http://www.aprs.org/aprs12/datum.txt ; this extension should be added at end of beacon message.
   // We only send this detailed info if it's likely we're interested in, i.e. searching for landing position
@@ -559,7 +559,7 @@ void sendLocation() {
   int mm = gps.time.minute();
   int ss = gps.time.second();
 
-  char timestamp_buff[7];
+  char timestamp_buff[7]; //char buff for gps associated values created
 
   sprintf(timestamp_buff, "%02d", gps.time.isValid() ? (int)gps.time.hour() : 0);
   sprintf(timestamp_buff + 2, "%02d", gps.time.isValid() ? (int)gps.time.minute() : 0);
@@ -571,7 +571,7 @@ void sendLocation() {
   RfPttON;
   delay(1000);
 
-  APRS_sendLocWtTmStmp(telemetry_buff, strlen(telemetry_buff), timestamp_buff);
+  APRS_sendLocWtTmStmp(telemetry_buff, strlen(telemetry_buff), timestamp_buff); //send full telemetry_buff with timestamp
   delay(50);
   while (digitalRead(1)) { ; }  //LibAprs TX Led pin PB1
   delay(50);
